@@ -5,6 +5,9 @@ import {
   useEffect,
   useState,
 } from "react";
+import Router from "next/router";
+import { setCookie, parseCookies } from "nookies";
+import { api } from "../service/api";
 
 type User = {
   email: string;
@@ -20,7 +23,7 @@ type SignInCredentials = {
 type AuthContextData = {
   signIn: (credentials: SignInCredentials) => Promise<void>;
   // signOut: () => void;
-  // user: User;
+  user: User;
   isAuthenticated: boolean;
 };
 type AuthProviderProps = {
@@ -30,12 +33,47 @@ type AuthProviderProps = {
 const AuthContext = createContext({} as AuthContextData);
 
 function AuthProvider({ children }: AuthProviderProps) {
-  const isAuthenticated = false;
+  const [user, setUser] = useState<User>();
+  const isAuthenticated = !!user;
+
+  useEffect(() => {
+    const { "@nextAuth.token": token } = parseCookies();
+    if (token) {
+      api.get("/me").then((response) => {
+        const { email, permissions, roles } = response.data;
+        setUser({ email, permissions, roles });
+      });
+    }
+  }, []);
+
   async function signIn({ email, password }: SignInCredentials) {
-    console.log({ email, password });
+    try {
+      const response = await api.post("sessions", { email, password });
+      console.log(response.data);
+
+      const { token, refreshToken, permissions, roles } = response.data;
+
+      setCookie(undefined, "@nextAuth.token", token, {
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: "/",
+      });
+      setCookie(undefined, "@nextAuth.refreshToken", refreshToken, {
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: "/",
+      });
+      setUser({
+        email,
+        permissions,
+        roles,
+      });
+      api.defaults.headers["Authorization"] = `Bearer ${token}`;
+      Router.push("/dashboard");
+    } catch (error) {
+      console.log(error);
+    }
   }
   return (
-    <AuthContext.Provider value={{ signIn, isAuthenticated }}>
+    <AuthContext.Provider value={{ signIn, isAuthenticated, user }}>
       {children}
     </AuthContext.Provider>
   );

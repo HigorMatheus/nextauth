@@ -1,8 +1,8 @@
-import Router from "next/router";
-import { destroyCookie } from "nookies";
 import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { api } from "../service/api";
+import { setupAPIClient } from "../service/api";
+import { api } from "../service/apiClient";
+import { withSSRAuth } from "../utils/withSSRAuth";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -21,3 +21,11 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export const getServerSideProps = withSSRAuth(async (ctx) => {
+  const apiClient = setupAPIClient(ctx);
+  const response = await apiClient.get("me");
+  return {
+    props: {},
+  };
+});

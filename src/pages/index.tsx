@@ -1,9 +1,4 @@
-import { GetServerSideProps, GetServerSidePropsResult } from "next";
-import { redirect } from "next/dist/next-server/server/api-utils";
-import Head from "next/head";
-import Image from "next/image";
-import { parseCookies } from "nookies";
-import { FormEvent, useContext, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import styles from "../styles/Home.module.css";
 import { withSSRGuest } from "../utils/withSSRGuest";

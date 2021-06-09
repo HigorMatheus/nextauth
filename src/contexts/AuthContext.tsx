@@ -7,7 +7,7 @@ import {
 } from "react";
 import Router from "next/router";
 import { setCookie, parseCookies, destroyCookie } from "nookies";
-import { api } from "../service/api";
+import { api } from "../service/apiClient";
 
 type User = {
   email: string;
@@ -37,6 +37,7 @@ export function signOut() {
   destroyCookie(undefined, "@nextAuth.refreshToken");
   Router.push("/");
 }
+
 function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User>();
   const isAuthenticated = !!user;

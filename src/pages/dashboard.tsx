@@ -7,11 +7,11 @@ import { api } from "../service/apiClient";
 import { withSSRAuth } from "../utils/withSSRAuth";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
-  const userCamSeeMetrics = useCan({
-    roles: ["administrator", "editor"],
-  });
+  // const userCamSeeMetrics = useCan({
+  //   roles: ["administrator", "editor"],
+  // });
   useEffect(() => {
     api
       .get("/me")
@@ -23,6 +23,7 @@ export default function Dashboard() {
   return (
     <div>
       <h1>Dashboard {user?.email}</h1>
+      <button onClick={signOut}>Sing Out</button>
       <Can permissions={["metrics.list"]}>
         <div>Métricas</div>
       </Can>
